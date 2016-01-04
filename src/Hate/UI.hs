@@ -5,6 +5,7 @@
 module Hate.UI where
 
 import Hate.Graphics
+import Hate.Math
 import qualified Hate.Events.Types as Hate
 
 import Hate.Fonts
@@ -43,11 +44,11 @@ data UI = UI {
     --, rootElement :: ElementNode 
 }
 
-makeUI :: (String, String) -> IO UI
-makeUI (pathFontData, pathFontSprite) = do
+makeUI :: (String, String) -> [AnyElement]-> IO UI
+makeUI (pathFontData, pathFontSprite) elems = do
     fontData <- loadFontData pathFontData
     fontSprite <- loadSprite pathFontSprite
-    return $ UI (UIBase (fontData, fontSprite)) []
+    return $ UI (UIBase (fontData, fontSprite)) elems
 
 drawUI :: UI -> [DrawRequest]
 drawUI ui = concatMap (drawElement ui) $ elements ui
@@ -59,25 +60,23 @@ data AnyElement = forall e. Element e => AnyElement e
 instance Element AnyElement where
     drawElement ui (AnyElement e) = drawElement ui e
 
-{-
-instance Element ElementNode where
-    drawElement (ElementNode val cs) = drawElement val ++ concatMap drawElement cs
--}
-
 -- Here come the actual controls
 data Label = Label String
+
+label :: String -> AnyElement
+label str = AnyElement $ Label str
 
 instance Element Label where
     drawElement ui (Label str) = hatePrint (uiFont . base $ ui) str
 
---instance Element Label where
---    drawElement (Label str) = hatePrint .. .. str
-
 -- In order to keep things simple, button cannot nest arbitrary controls
 data Button = Button Label
---instance Element Button where
 
+button :: String -> AnyElement
+button str = AnyElement $ Button (Label str)
 
+instance Element Button where
+    drawElement ui (Button lab) = drawElement ui lab ++ [rectangle (Vec2 10 10)]
 
 --data ImageButton = ImageButton Hate.Sprite
 

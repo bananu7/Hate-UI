@@ -9,21 +9,20 @@ import Hate.UI
 import Control.Monad.Reader
 
 data SampleState = SampleState {
-      label :: Label
-    , ui :: UI
+    ui :: UI
 }
 
 hoistUI :: Reader UI a -> Reader SampleState a
 hoistUI f = ask >>= \s -> return $ runReader f (ui s)
 
+myUI = [button "test label"]
+
 sampleLoad :: LoadFn SampleState
 sampleLoad = SampleState 
-    <$> (pure $ Label "test label")
-    <*> (makeUI ("Arial.fnt", "Arial_0.png"))
+    <$> (makeUI ("Arial.fnt", "Arial_0.png") myUI)
 
 sampleDraw :: DrawFn SampleState
 sampleDraw = runReader $ do
-    l <- label <$> ask
     hoistUI . reader $ drawUI
 
 sampleUpdate :: UpdateFn SampleState
