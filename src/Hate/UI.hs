@@ -38,7 +38,8 @@ data UIBase = UIBase {
 }
 
 data UI = UI { 
-    base :: UIBase
+    base :: UIBase,
+    elements :: [AnyElement]
     --, rootElement :: ElementNode 
 }
 
@@ -46,12 +47,17 @@ makeUI :: (String, String) -> IO UI
 makeUI (pathFontData, pathFontSprite) = do
     fontData <- loadFontData pathFontData
     fontSprite <- loadSprite pathFontSprite
-    return $ UI (UIBase (fontData, fontSprite))
+    return $ UI (UIBase (fontData, fontSprite)) []
+
+
+class Element a where
+    drawElement :: a -> UI -> [DrawRequest]
+
+data AnyElement = forall e. Element e => AnyElement e
+instance Element AnyElement where
+    drawElement (AnyElement e) = drawElement e
 
 {-
-class Element a where
-    drawElement :: MonadReader UI m => a -> m [DrawRequest]
-
 instance Element ElementNode where
     drawElement (ElementNode val cs) = drawElement val ++ concatMap drawElement cs
 -}
@@ -59,8 +65,8 @@ instance Element ElementNode where
 -- Here come the actual controls
 data Label = Label String
 
-drawLabel :: Label -> UI -> [DrawRequest]
-drawLabel (Label str) ui = hatePrint (uiFont . base $ ui) str
+instance Element Label where
+    drawElement (Label str) ui = hatePrint (uiFont . base $ ui) str
 
 --instance Element Label where
 --    drawElement (Label str) = hatePrint .. .. str
