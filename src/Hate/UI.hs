@@ -6,7 +6,10 @@ module Hate.UI where
 
 import Hate.Graphics
 import qualified Hate.Events.Types as Hate
+
 import Hate.Fonts
+import Hate.Fonts.Loader
+
 import Control.Monad.Reader
 import Control.Monad.State
 
@@ -30,10 +33,20 @@ data ElementNode = forall a. Element a => ElementNode {
 }
 -}
 
-data UI = UI { 
+data UIBase = UIBase {
     uiFont :: Font
+}
+
+data UI = UI { 
+    base :: UIBase
     --, rootElement :: ElementNode 
 }
+
+makeUI :: (String, String) -> IO UI
+makeUI (pathFontData, pathFontSprite) = do
+    fontData <- loadFontData pathFontData
+    fontSprite <- loadSprite pathFontSprite
+    return $ UI (UIBase (fontData, fontSprite))
 
 {-
 class Element a where
@@ -43,14 +56,11 @@ instance Element ElementNode where
     drawElement (ElementNode val cs) = drawElement val ++ concatMap drawElement cs
 -}
 
-type WithUI a = forall m. MonadState UI m => m a
-type WithUIRead a = forall m. MonadReader UI m => m a
-
 -- Here come the actual controls
 data Label = Label String
 
-drawLabel :: Label -> WithUIRead [DrawRequest]
-drawLabel (Label str) = ask >>= \ui -> return $ hatePrint (uiFont ui) str
+drawLabel :: Label -> UI -> [DrawRequest]
+drawLabel (Label str) ui = hatePrint (uiFont . base $ ui) str
 
 --instance Element Label where
 --    drawElement (Label str) = hatePrint .. .. str
