@@ -24,7 +24,7 @@ sampleLoad = SampleState
 sampleDraw :: DrawFn SampleState
 sampleDraw = runReader $ do
     l <- label <$> ask
-    hoistUI . reader $ drawElement l
+    hoistUI . reader $ drawUI
 
 sampleUpdate :: UpdateFn SampleState
 sampleUpdate _ = return ()

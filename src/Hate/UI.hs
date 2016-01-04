@@ -49,13 +49,15 @@ makeUI (pathFontData, pathFontSprite) = do
     fontSprite <- loadSprite pathFontSprite
     return $ UI (UIBase (fontData, fontSprite)) []
 
+drawUI :: UI -> [DrawRequest]
+drawUI ui = concatMap (drawElement ui) $ elements ui
 
 class Element a where
-    drawElement :: a -> UI -> [DrawRequest]
+    drawElement :: UI -> a -> [DrawRequest]
 
 data AnyElement = forall e. Element e => AnyElement e
 instance Element AnyElement where
-    drawElement (AnyElement e) = drawElement e
+    drawElement ui (AnyElement e) = drawElement ui e
 
 {-
 instance Element ElementNode where
@@ -66,7 +68,7 @@ instance Element ElementNode where
 data Label = Label String
 
 instance Element Label where
-    drawElement (Label str) ui = hatePrint (uiFont . base $ ui) str
+    drawElement ui (Label str) = hatePrint (uiFont . base $ ui) str
 
 --instance Element Label where
 --    drawElement (Label str) = hatePrint .. .. str
