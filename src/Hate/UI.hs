@@ -66,7 +66,7 @@ uiPrint ui str = hatePrint (uiFont . base $ ui) str
 data Button s = Button Vec2 (Label s)
 
 button :: forall s. Vec2 -> String -> AnyElement s
-button pos str = AnyElement $ (Button pos (Label pos (PlainValue str) :: Label s) :: Button s)
+button pos str = AnyElement $ (Button pos (Label (Vec2 1 1) (PlainValue str) :: Label s) :: Button s)
 
 instance Element s (Button s) where
     drawElement s (Button p lab) = (translate p) <$> drawElement s lab ++ [line (Vec2 0 0) (Vec2 10 10)]
