@@ -17,9 +17,16 @@ data SampleState = SampleState {
 instance HasUI SampleState where
     getUI = ui
 
+myWindow = window (Vec2 40 80) [
+    label (Vec2 10 10) (PlainValue "label1"),
+    label (Vec2 10 30) (PlainValue "label2"),
+    button (Vec2 85 0) (Vec2 15 15) "x" id
+    ]
+
 myUI = [
     label (Vec2 10 10) (Binding (show . counter)),
-    button (Vec2 10 40) "button" (\s -> s { counter = 0 })
+    button (Vec2 10 40) (Vec2 50 20) "button" (\s -> s { counter = 0 }),
+    myWindow
     ]
 
 sampleLoad :: LoadFn SampleState

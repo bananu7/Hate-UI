@@ -4,7 +4,10 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TupleSections #-}
 
-module Hate.UI.Controls.Button where
+module Hate.UI.Controls.Window
+    ( window
+    )
+where
 
 import Hate.UI.Types
 import Hate.UI.Controls.Label
@@ -16,16 +19,19 @@ import Hate.Math
 import Control.Monad.State (state)
 
 -- In order to keep things simple, button cannot nest arbitrary controls
-data Button s = Button Vec2 Vec2 (Label s) (s -> s)
+data Window s = Window Vec2 [AnyElement s]
 
 -- |Yes this is hardcoded and it's terrible but it's just for now
-buttonSize = (Vec2 50 20)
+windowSize = (Vec2 100 100)
 
-instance Element s (Button s) where
-    drawElement s (Button p sz lab _) = (translate p) <$> drawElement s lab ++ (box (Vec2 0 0) sz)
-    click mp (Button pos sz _ action) = if between (pos, pos + sz) mp 
+instance Element s (Window s) where
+    drawElement s (Window pos children) = translate pos <$> (box (Vec2 0 0) windowSize) ++ concatMap (drawElement s) children
+
+    {-
+    click mp (Button pos _ action) = if between (pos, pos + buttonSize) mp 
         then Just . state $ ((),) . action
         else Nothing
+    -}
 
-button :: forall s. Vec2 -> Vec2 -> String -> (s -> s) -> AnyElement s
-button pos sz str action = AnyElement $ (Button pos sz (Label (Vec2 1 1) (PlainValue str) :: Label s) action :: Button s)
+window :: forall s. Vec2 -> [AnyElement s] -> AnyElement s
+window pos children = AnyElement $ Window pos children
