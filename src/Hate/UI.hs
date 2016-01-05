@@ -1,6 +1,9 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Hate.UI where
 
@@ -18,7 +21,7 @@ import Control.Monad.State
 data UIEvent =
       ClickEvent GLFW.MouseButton
     | MouseOverEvent
-    | MouseOffEvent 
+    | MouseOffEvent
 
 class EventReceiver r where
     accept :: UIEvent -> r -> r
@@ -38,45 +41,51 @@ data UIBase = UIBase {
     uiFont :: Font
 }
 
-data UI = UI { 
+data UI s = UI {
     base :: UIBase,
-    elements :: [AnyElement]
-    --, rootElement :: ElementNode 
+    elements :: [AnyElement s]
+    --, rootElement :: ElementNode
 }
 
-makeUI :: (String, String) -> [AnyElement]-> IO UI
+makeUI :: (String, String) -> [AnyElement s]-> IO (UI s)
 makeUI (pathFontData, pathFontSprite) elems = do
     fontData <- loadFontData pathFontData
     fontSprite <- loadSprite pathFontSprite
     return $ UI (UIBase (fontData, fontSprite)) elems
 
-drawUI :: UI -> [DrawRequest]
-drawUI ui = concatMap (drawElement ui) $ elements ui
+drawUI :: UI s -> s -> [DrawRequest]
+drawUI ui s = concatMap (drawElement ui s) $ elements ui
 
-class Element a where
-    drawElement :: UI -> a -> [DrawRequest]
+class Element s a where
+    drawElement :: UI s -> s -> a -> [DrawRequest]
 
-data AnyElement = forall e. Element e => AnyElement e
-instance Element AnyElement where
-    drawElement ui (AnyElement e) = drawElement ui e
+data AnyElement s = forall e. Element s e => AnyElement e
+instance Element s (AnyElement s) where
+    drawElement ui s (AnyElement e) = drawElement ui s e
+
+-- |Represents a binding to a type of value a inside of state s
+data Binding s a = PlainValue a | Binding (s -> a)
 
 -- Here come the actual controls
-data Label = Label Vec2 String
+data Label s = Label Vec2 (Binding s String)
 
-label :: Vec2 -> String -> AnyElement
-label p s = AnyElement $ Label p s
+label :: Vec2 -> (Binding s String) -> AnyElement s
+label p b = AnyElement $ Label p b
 
-instance Element Label where
-    drawElement ui (Label p str) = (translate p) <$> hatePrint (uiFont . base $ ui) str
+instance Element s (Label s) where
+    drawElement ui s (Label p (PlainValue str)) = (translate p) <$> uiPrint ui str
+    drawElement ui s (Label p (Binding b)) = (translate p) <$> uiPrint ui (b s)
+
+uiPrint ui str = hatePrint (uiFont . base $ ui) str
 
 -- In order to keep things simple, button cannot nest arbitrary controls
-data Button = Button Vec2 Label
+data Button s = Button Vec2 (Label s)
 
-button :: Vec2 -> String -> AnyElement
-button pos str = AnyElement $ Button pos (Label pos str)
+button :: forall s. Vec2 -> String -> AnyElement s
+button pos str = AnyElement $ (Button pos (Label pos (PlainValue str) :: Label s) :: Button s)
 
-instance Element Button where
-    drawElement ui (Button p lab) = (translate p) <$> drawElement ui lab ++ [rectangle (Vec2 0 0)]
+instance Element s (Button s) where
+    drawElement ui s (Button p lab) = (translate p) <$> drawElement ui s lab ++ [line (Vec2 0 0) (Vec2 10 10)]
 
 --data ImageButton = ImageButton Hate.Sprite
 
