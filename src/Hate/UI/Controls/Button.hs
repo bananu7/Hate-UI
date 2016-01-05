@@ -21,8 +21,15 @@ data Button s = Button Vec2 (Label s) (s -> s)
 -- |Yes this is hardcoded and it's terrible but it's just for now
 buttonSize = (Vec2 50 20)
 
+box (Vec2 ax ay) (Vec2 bx by) = [
+    line (Vec2 ax ay) (Vec2 bx ay),
+    line (Vec2 bx ay) (Vec2 bx by),
+    line (Vec2 bx by) (Vec2 ax by),
+    line (Vec2 ax by) (Vec2 ax ay)
+    ]
+
 instance Element s (Button s) where
-    drawElement s (Button p lab _) = (translate p) <$> drawElement s lab ++ [line (Vec2 0 0) buttonSize]
+    drawElement s (Button p lab _) = (translate p) <$> drawElement s lab ++ (box (Vec2 0 0) buttonSize)
     click mp (Button pos _ action) = if between (pos, pos + buttonSize) mp 
         then Just . state $ ((),) . action
         else Nothing
