@@ -18,7 +18,5 @@ instance Element s (Label s) where
     drawElement s (Label p (PlainValue str)) = (translate p) <$> uiPrint (getUI s) str
     drawElement s (Label p (Binding b)) = (translate p) <$> uiPrint (getUI s) (b s)
 
-    click _ _ = Nothing
-
 label :: Vec2 -> (Binding s String) -> AnyElement s
 label p b = AnyElement $ Label p b

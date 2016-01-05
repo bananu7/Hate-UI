@@ -19,7 +19,7 @@ instance HasUI SampleState where
 
 myUI = [
     label (Vec2 10 10) (Binding (show . counter)),
-    button (Vec2 10 40) "button"
+    button (Vec2 10 40) "button" (\s -> s { counter = 0 })
     ]
 
 sampleLoad :: LoadFn SampleState

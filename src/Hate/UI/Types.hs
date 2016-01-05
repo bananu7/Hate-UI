@@ -29,9 +29,18 @@ class HasUI s where
 -- |Represents a binding to a type of value a inside of state s
 data Binding s a = PlainValue a | Binding (s -> a)
 
+type Effect s = forall m. (HasUI s, MonadState s m) => Maybe (m ())
+
 class Element s a where
     drawElement :: HasUI s => s -> a -> [DrawRequest]
-    click :: (HasUI s, MonadState s m) => Vec2 -> a -> Maybe (m ())
+
+    click :: Vec2 -> a -> Effect s
+    click _ _ = Nothing
+
+{-
+class EventReceiver s a where
+    receive :: Event -> State a (Effect s)
+-}
 
 data AnyElement s = forall e. Element s e => AnyElement e
 instance Element s (AnyElement s) where
