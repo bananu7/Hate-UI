@@ -8,6 +8,7 @@
 module Hate.UI
     ( makeUI
     , drawUI
+    , clickUI
     , module Hate.UI.Types
     , module Hate.UI.Controls
     )
@@ -19,9 +20,11 @@ import Hate.UI.Types
 import Hate.Graphics
 import Hate.Fonts
 import Hate.Fonts.Loader
+import Hate.Math
 
 import Control.Monad.Reader
 import Control.Monad.State
+import Data.Maybe (catMaybes)
 
 makeUI :: (String, String) -> [AnyElement s]-> IO (UI s)
 makeUI (pathFontData, pathFontSprite) elems = do
@@ -31,3 +34,6 @@ makeUI (pathFontData, pathFontSprite) elems = do
 
 drawUI :: HasUI s => s -> [DrawRequest]
 drawUI s = concatMap (drawElement s) (elements . getUI $ s)
+
+clickUI :: (HasUI s, MonadState s m) => Vec2 -> s -> m ()
+clickUI p s = sequence_ . catMaybes . map (click p) $ (elements . getUI $ s)
