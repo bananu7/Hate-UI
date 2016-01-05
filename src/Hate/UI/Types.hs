@@ -36,4 +36,5 @@ class Element s a where
 data AnyElement s = forall e. Element s e => AnyElement e
 instance Element s (AnyElement s) where
     drawElement s (AnyElement e) = drawElement s e
+    click mp (AnyElement e) = click mp e
 

@@ -16,11 +16,11 @@ import Hate.Math
 data Button s = Button Vec2 (Label s)
 
 -- |Yes this is hardcoded and it's terrible but it's just for now
-buttonSize = (Vec2 10 10)
+buttonSize = (Vec2 50 20)
 
 instance Element s (Button s) where
     drawElement s (Button p lab) = (translate p) <$> drawElement s lab ++ [line (Vec2 0 0) buttonSize]
-    click mp (Button pos _)= if between (pos, pos + buttonSize) mp then Just $ do
+    click mp (Button pos _) = if between (pos, pos + buttonSize) mp then Just $ do
         error "clicked!"
         else
             Nothing
