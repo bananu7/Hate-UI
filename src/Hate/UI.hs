@@ -61,22 +61,22 @@ instance Element AnyElement where
     drawElement ui (AnyElement e) = drawElement ui e
 
 -- Here come the actual controls
-data Label = Label String
+data Label = Label Vec2 String
 
-label :: String -> AnyElement
-label str = AnyElement $ Label str
+label :: Vec2 -> String -> AnyElement
+label p s = AnyElement $ Label p s
 
 instance Element Label where
-    drawElement ui (Label str) = hatePrint (uiFont . base $ ui) str
+    drawElement ui (Label p str) = (translate p) <$> hatePrint (uiFont . base $ ui) str
 
 -- In order to keep things simple, button cannot nest arbitrary controls
-data Button = Button Label
+data Button = Button Vec2 Label
 
-button :: String -> AnyElement
-button str = AnyElement $ Button (Label str)
+button :: Vec2 -> String -> AnyElement
+button pos str = AnyElement $ Button pos (Label pos str)
 
 instance Element Button where
-    drawElement ui (Button lab) = drawElement ui lab ++ [rectangle (Vec2 10 10)]
+    drawElement ui (Button p lab) = (translate p) <$> drawElement ui lab ++ [rectangle (Vec2 0 0)]
 
 --data ImageButton = ImageButton Hate.Sprite
 

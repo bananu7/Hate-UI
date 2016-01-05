@@ -15,7 +15,7 @@ data SampleState = SampleState {
 hoistUI :: Reader UI a -> Reader SampleState a
 hoistUI f = ask >>= \s -> return $ runReader f (ui s)
 
-myUI = [button "test label"]
+myUI = [button (Vec2 10 10) "test label"]
 
 sampleLoad :: LoadFn SampleState
 sampleLoad = SampleState 
