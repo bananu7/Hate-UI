@@ -17,25 +17,10 @@ import Hate.Fonts.Loader
 import Control.Monad.Reader
 import Control.Monad.State
 
-{-
-data UIEvent =
-      ClickEvent GLFW.MouseButton
-    | MouseOverEvent
-    | MouseOffEvent
-
-class EventReceiver r where
-    accept :: UIEvent -> r -> r
-
-class (EventReceiver a, Show a) => Element a where
-
--}
-
-{-
-data ElementNode = forall a. Element a => ElementNode {
-      value :: a
-    , children :: [ElementNode]
-}
--}
+-- |This is an equivalent of the state monad, but tailored for the UI.
+-- We'll see how useful this approach is.
+class HasUI s where
+    getUI :: s -> UI s
 
 data UIBase = UIBase {
     uiFont :: Font
@@ -44,7 +29,6 @@ data UIBase = UIBase {
 data UI s = UI {
     base :: UIBase,
     elements :: [AnyElement s]
-    --, rootElement :: ElementNode
 }
 
 makeUI :: (String, String) -> [AnyElement s]-> IO (UI s)
@@ -53,15 +37,15 @@ makeUI (pathFontData, pathFontSprite) elems = do
     fontSprite <- loadSprite pathFontSprite
     return $ UI (UIBase (fontData, fontSprite)) elems
 
-drawUI :: UI s -> s -> [DrawRequest]
-drawUI ui s = concatMap (drawElement ui s) $ elements ui
+drawUI :: HasUI s => s -> [DrawRequest]
+drawUI s = concatMap (drawElement s) (elements . getUI $ s)
 
 class Element s a where
-    drawElement :: UI s -> s -> a -> [DrawRequest]
+    drawElement :: HasUI s => s -> a -> [DrawRequest]
 
 data AnyElement s = forall e. Element s e => AnyElement e
 instance Element s (AnyElement s) where
-    drawElement ui s (AnyElement e) = drawElement ui s e
+    drawElement s (AnyElement e) = drawElement s e
 
 -- |Represents a binding to a type of value a inside of state s
 data Binding s a = PlainValue a | Binding (s -> a)
@@ -73,8 +57,8 @@ label :: Vec2 -> (Binding s String) -> AnyElement s
 label p b = AnyElement $ Label p b
 
 instance Element s (Label s) where
-    drawElement ui s (Label p (PlainValue str)) = (translate p) <$> uiPrint ui str
-    drawElement ui s (Label p (Binding b)) = (translate p) <$> uiPrint ui (b s)
+    drawElement s (Label p (PlainValue str)) = (translate p) <$> uiPrint (getUI s) str
+    drawElement s (Label p (Binding b)) = (translate p) <$> uiPrint (getUI s) (b s)
 
 uiPrint ui str = hatePrint (uiFont . base $ ui) str
 
@@ -85,7 +69,7 @@ button :: forall s. Vec2 -> String -> AnyElement s
 button pos str = AnyElement $ (Button pos (Label pos (PlainValue str) :: Label s) :: Button s)
 
 instance Element s (Button s) where
-    drawElement ui s (Button p lab) = (translate p) <$> drawElement ui s lab ++ [line (Vec2 0 0) (Vec2 10 10)]
+    drawElement s (Button p lab) = (translate p) <$> drawElement s lab ++ [line (Vec2 0 0) (Vec2 10 10)]
 
 --data ImageButton = ImageButton Hate.Sprite
 
