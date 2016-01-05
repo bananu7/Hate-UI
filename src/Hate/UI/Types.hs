@@ -7,6 +7,9 @@ module Hate.UI.Types where
 
 import Hate.Fonts
 import Hate.Graphics
+import Hate.Math
+
+import Control.Monad.State
 
 data UIBase = UIBase {
     uiFont :: Font
@@ -28,6 +31,7 @@ data Binding s a = PlainValue a | Binding (s -> a)
 
 class Element s a where
     drawElement :: HasUI s => s -> a -> [DrawRequest]
+    click :: (HasUI s, MonadState s m) => Vec2 -> a -> Maybe (m ())
 
 data AnyElement s = forall e. Element s e => AnyElement e
 instance Element s (AnyElement s) where
