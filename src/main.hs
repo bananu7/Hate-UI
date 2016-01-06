@@ -17,7 +17,7 @@ data SampleState = SampleState {
 instance HasUI SampleState where
     getUI = ui
 
-myWindow = window (Vec2 40 80) [
+myWindow = window (Vec2 40 80) (Vec2 100 100) [
     label (Vec2 10 10) (PlainValue "label1"),
     label (Vec2 10 30) (PlainValue "label2"),
     button (Vec2 85 0) (Vec2 15 15) "x" id

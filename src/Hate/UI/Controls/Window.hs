@@ -19,13 +19,10 @@ import Hate.Math
 import Control.Monad.State (state)
 
 -- In order to keep things simple, button cannot nest arbitrary controls
-data Window s = Window Vec2 [AnyElement s]
-
--- |Yes this is hardcoded and it's terrible but it's just for now
-windowSize = (Vec2 100 100)
+data Window s = Window Vec2 Vec2 [AnyElement s]
 
 instance Element s (Window s) where
-    drawElement s (Window pos children) = translate pos <$> (box (Vec2 0 0) windowSize) ++ concatMap (drawElement s) children
+    drawElement s (Window pos sz children) = translate pos <$> (box (Vec2 0 0) sz) ++ concatMap (drawElement s) children
 
     {-
     click mp (Button pos _ action) = if between (pos, pos + buttonSize) mp 
@@ -33,5 +30,5 @@ instance Element s (Window s) where
         else Nothing
     -}
 
-window :: forall s. Vec2 -> [AnyElement s] -> AnyElement s
-window pos children = AnyElement $ Window pos children
+window :: forall s. Vec2 -> Vec2 -> [AnyElement s] -> AnyElement s
+window pos sz children = AnyElement $ Window pos sz children
