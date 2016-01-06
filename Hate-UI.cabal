@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                Hate-UI
-version:             0.1.0.0
+version:             0.1.1.0
 -- synopsis:            
 -- description:         
 license:             MIT
@@ -26,7 +26,12 @@ executable main
 
 library
   exposed-modules:     Hate.UI
-  -- other-modules:       
+  other-modules:       Hate.UI.Controls,
+                       Hate.UI.Controls.Button,
+                       Hate.UI.Controls.Label,
+                       Hate.UI.Controls.Window,
+                       Hate.UI.Types,
+                       Hate.UI.Util
   -- other-extensions:    
   build-depends:       base >=4.8 && <4.9,
                        Hate,
