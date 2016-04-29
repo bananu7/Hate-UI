@@ -2,6 +2,8 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ImpredicativeTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Hate.UI.Types where
 
@@ -16,8 +18,7 @@ data UIBase = UIBase {
 }
 
 data UI s = UI {
-    base :: UIBase,
-    elements :: [AnyElement s]
+    base :: UIBase
 }
 
 
@@ -29,12 +30,13 @@ class HasUI s where
 -- |Represents a binding to a type of value a inside of state s
 data Binding s a = PlainValue a | Binding (s -> a)
 
-type Effect s = forall m. (HasUI s, MonadState s m) => Maybe (m ())
+type Effect s = forall m. (MonadState s m) => m ()
+type SelfEffect s a = Maybe (Effect s, a -> a)
 
 class Element s a where
-    drawElement :: HasUI s => s -> a -> [DrawRequest]
+    drawElement :: UI -> a -> [DrawRequest]
 
-    click :: Vec2 -> a -> Effect s
+    click :: Vec2 -> a -> SelfEffect s a
     click _ _ = Nothing
 
 {-
@@ -45,5 +47,7 @@ class EventReceiver s a where
 data AnyElement s = forall e. Element s e => AnyElement e
 instance Element s (AnyElement s) where
     drawElement s (AnyElement e) = drawElement s e
-    click mp (AnyElement e) = click mp e
+    click mp (AnyElement (e :: e)) = case (click mp e :: SelfEffect s e) of
+        Nothing -> Nothing
+
 

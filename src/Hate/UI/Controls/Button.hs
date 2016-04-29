@@ -13,15 +13,15 @@ import Hate.UI.Util
 import Hate.Graphics
 import Hate.Math
 
-import Control.Monad.State (state)
+import Control.Monad.State (state, modify, MonadState)
 
 -- In order to keep things simple, button cannot nest arbitrary controls
 data Button s = Button Vec2 Vec2 (Label s) (s -> s)
-
+    
 instance Element s (Button s) where
     drawElement s (Button p sz lab _) = (translate p) <$> drawElement s lab ++ (box (Vec2 0 0) sz)
     click mp (Button pos sz _ action) = if between (pos, pos + sz) mp 
-        then Just . state $ ((),) . action
+        then Just (modify action, id)
         else Nothing
 
 button :: forall s. Vec2 -> Vec2 -> String -> (s -> s) -> AnyElement s

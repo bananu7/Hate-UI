@@ -32,8 +32,9 @@ makeUI (pathFontData, pathFontSprite) elems = do
     fontSprite <- loadSprite pathFontSprite
     return $ UI (UIBase (fontData, fontSprite)) elems
 
-drawUI :: HasUI s => s -> [DrawRequest]
-drawUI s = concatMap (drawElement s) (elements . getUI $ s)
+
+drawUI :: UI -> [Element] -> [DrawRequest]
+drawUI ui elements = concatMap (drawElement ui) elements
 
 clickUI :: (HasUI s, MonadState s m) => Vec2 -> s -> m ()
 clickUI p s = sequence_ . catMaybes . map (click p) $ (elements . getUI $ s)
