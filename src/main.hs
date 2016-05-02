@@ -32,7 +32,11 @@ myUI = [
     ]
 -}
 
-myUI = button (Vec2 10 40) (Vec2 50 20) "button" (\s -> s { counter = 0 })
+myUI = buttonBnd
+    (Vec2 10 40)
+    (Vec2 50 20)
+    (Binding (("button " ++) . show . counter))
+    (\s -> s { counter = 0 })
 
 sampleLoad :: LoadFn SampleState
 sampleLoad = SampleState

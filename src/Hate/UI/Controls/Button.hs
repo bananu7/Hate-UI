@@ -26,3 +26,6 @@ instance Element s (Button s) where
 
 button :: forall s. Vec2 -> Vec2 -> String -> (s -> s) -> AnyElement s
 button pos sz str action = AnyElement $ (Button pos sz (Label (Vec2 1 1) (PlainValue str) :: Label s) action :: Button s)
+
+buttonBnd :: forall s. Vec2 -> Vec2 -> Binding s String -> (s -> s) -> AnyElement s
+buttonBnd pos sz bnd action = AnyElement $ (Button pos sz (Label (Vec2 1 1) bnd :: Label s) action :: Button s)

@@ -13,6 +13,8 @@ import Hate.Math
 
 import Control.Monad.State
 
+import Unsafe.Coerce
+
 data UIBase = UIBase {
     uiFont :: Font
 }
@@ -54,5 +56,5 @@ instance Element s (AnyElement s) where
     drawElement ub s (AnyElement e) = drawElement ub s e
     click mp (AnyElement (e :: e)) = case (click mp e :: SelfEffect s e) of
         Nothing -> Nothing
-        Just (sE, selfE) -> Just (sE, selfE)
+        Just (sE, selfE) -> unsafeCoerce $ Just (sE, selfE)
 
