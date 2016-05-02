@@ -5,7 +5,8 @@ import Hate.Math
 import Hate.Fonts
 import Hate.Graphics
 
-uiPrint ui str = hatePrint (uiFont . base $ ui) str
+uiPrint :: UIBase -> String -> [DrawRequest]
+uiPrint ui str = hatePrint (uiFont $ ui) str
 
 between :: (Vec2, Vec2) -> Vec2 -> Bool
 between (Vec2 minx miny, Vec2 maxx maxy) (Vec2 x y) = foldl1 (&&) [x >= minx, x <= maxx, y >= miny, y <= maxy]

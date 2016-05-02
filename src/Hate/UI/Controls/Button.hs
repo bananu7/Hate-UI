@@ -19,9 +19,9 @@ import Control.Monad.State (state, modify, MonadState)
 data Button s = Button Vec2 Vec2 (Label s) (s -> s)
     
 instance Element s (Button s) where
-    drawElement s (Button p sz lab _) = (translate p) <$> drawElement s lab ++ (box (Vec2 0 0) sz)
+    drawElement ub s (Button p sz lab _) = (translate p) <$> drawElement ub s lab ++ (box (Vec2 0 0) sz)
     click mp (Button pos sz _ action) = if between (pos, pos + sz) mp 
-        then Just (modify action, id)
+        then Just (action, id)
         else Nothing
 
 button :: forall s. Vec2 -> Vec2 -> String -> (s -> s) -> AnyElement s

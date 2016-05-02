@@ -16,6 +16,7 @@ data SampleState = SampleState {
 
 instance HasUI SampleState where
     getUI = ui
+    putUI ui' s = s { ui = ui' }
 
 myWindow = window (Vec2 40 80) (Vec2 100 100) [
     label (Vec2 10 10) (PlainValue "label1"),
@@ -23,11 +24,15 @@ myWindow = window (Vec2 40 80) (Vec2 100 100) [
     button (Vec2 85 0) (Vec2 15 15) "x" id
     ]
 
+{-}
 myUI = [
     label (Vec2 10 10) (Binding (show . counter)),
     button (Vec2 10 40) (Vec2 50 20) "button" (\s -> s { counter = 0 }),
     myWindow
     ]
+-}
+
+myUI = button (Vec2 10 40) (Vec2 50 20) "button" (\s -> s { counter = 0 })
 
 sampleLoad :: LoadFn SampleState
 sampleLoad = SampleState
@@ -45,7 +50,7 @@ processEvent (EventCursorPos x y) = modify $ \s -> s { mousePos = Vec2 x y }
 processEvent (EventMouseButton _ _ _) = do
     mp <- gets mousePos
     s <- get
-    clickUI mp s
+    put $ clickUI mp s
     
 processEvent _ = return ()
 

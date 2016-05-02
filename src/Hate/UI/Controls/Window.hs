@@ -22,7 +22,7 @@ import Control.Monad.State (state)
 data Window s = Window Vec2 Vec2 [AnyElement s]
 
 instance Element s (Window s) where
-    drawElement s (Window pos sz children) = translate pos <$> (box (Vec2 0 0) sz) ++ concatMap (drawElement s) children
+    drawElement ub s (Window pos sz children) = translate pos <$> (box (Vec2 0 0) sz) ++ concatMap (drawElement ub s) children
 
     {-
     click mp (Button pos _ action) = if between (pos, pos + buttonSize) mp 
