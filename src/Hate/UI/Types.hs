@@ -51,10 +51,12 @@ class EventReceiver s a where
     receive :: Event -> State a (Effect s)
 -}
 
-data AnyElement s = forall e. Element s e => AnyElement e
+data AnyElement s = forall e. Element s e => AnyElement { unAnyElement :: e }
 instance Element s (AnyElement s) where
     drawElement ub s (AnyElement e) = drawElement ub s e
     click mp (AnyElement (e :: e)) = case (click mp e :: SelfEffect s e) of
         Nothing -> Nothing
-        Just (sE, selfE) -> unsafeCoerce $ Just (sE, selfE)
+        Just (sE, selfE) -> Just (sE, liftToAny selfE)
 
+liftToAny :: Element s e => (e-> e) -> AnyElement s -> AnyElement s
+liftToAny f (AnyElement (e :: e)) = AnyElement $ f (unsafeCoerce e)
