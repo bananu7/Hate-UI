@@ -35,9 +35,10 @@ instance Element s (Window s) where
         (drawElement ub w (windowAddBtn w))
         )
 
-    click mp (Window pos sz add dummies) = Just (id, selfE)
+    click mp (Window pos sz add dummies) = (id, selfE)
         where
-            (winE, addE) = fromMaybe (id, id) $ click (mp - pos) add
+            (winE, addE) = click (mp - pos) add
+            -- TODO: this update should be much easier to do
             selfE = winE . (\w -> w { windowAddBtn = addE $ windowAddBtn w })
 
 window :: forall s. Vec2 -> Vec2 -> Int -> Window s

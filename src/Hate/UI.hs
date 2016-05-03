@@ -42,13 +42,12 @@ clickUI :: (HasUI s) => Vec2 -> Effect s
 clickUI p = execState $ do
     ui <- getUI <$> get
 
-    case click p (root ui) of
-        Nothing -> return ()
-        Just (effOnS, selfEff) -> do
-            -- apply self effect
-            let root' = selfEff (root ui)
-            let ui' = ui { root = root' }
-            modify $ putUI ui'
+    let (effOnS, selfEff) = click p (root ui)
 
-            -- apply the root element effect
-            modify effOnS
+    -- apply self effect
+    let root' = selfEff (root ui)
+    let ui' = ui { root = root' }
+    modify $ putUI ui'
+
+    -- apply the root element effect
+    modify effOnS

@@ -38,25 +38,21 @@ class HasUI s where
 data Binding s a = PlainValue a | Binding (s -> a)
 
 type Effect s = s -> s
-type SelfEffect s a = Maybe (Effect s, Effect a)
+type SelfEffect s a = (Effect s, Effect a)
 
 class Element s a where
     drawElement :: UIBase -> s -> a -> [DrawRequest]
 
     click :: Vec2 -> a -> SelfEffect s a
-    click _ _ = Nothing
+    click _ _ = (id, id)
 
-{-
-class EventReceiver s a where
-    receive :: Event -> State a (Effect s)
--}
 
 data AnyElement s = forall e. Element s e => AnyElement { unAnyElement :: e }
 instance Element s (AnyElement s) where
     drawElement ub s (AnyElement e) = drawElement ub s e
-    click mp (AnyElement (e :: e)) = case (click mp e :: SelfEffect s e) of
-        Nothing -> Nothing
-        Just (sE, selfE) -> Just (sE, liftToAny selfE)
+    click mp (AnyElement (e :: e)) = (sE, liftToAny selfE)
+        where
+            (sE, selfE) = (click mp e :: SelfEffect s e)
 
 liftToAny :: Element s e => (e-> e) -> AnyElement s -> AnyElement s
 liftToAny f (AnyElement (e :: e)) = AnyElement $ f (unsafeCoerce e)
