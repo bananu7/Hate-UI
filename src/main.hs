@@ -18,12 +18,8 @@ instance HasUI SampleState where
     getUI = ui
     putUI ui' s = s { ui = ui' }
 
-myWindow = window (Vec2 40 80) (Vec2 100 100) [
-    label (Vec2 10 10) (PlainValue "label1"),
-    label (Vec2 10 30) (PlainValue "label2"),
-    button (Vec2 85 0) (Vec2 15 15) "x" id
-    ]
-
+myWindow :: Window SampleState
+myWindow = window (Vec2 40 80) (Vec2 200 200) 5
 {-}
 myUI = [
     label (Vec2 10 10) (Binding (show . counter)),
@@ -32,15 +28,17 @@ myUI = [
     ]
 -}
 
-myUI = buttonBnd
+{-
+myUI = AnyElement $ buttonBnd
     (Vec2 10 40)
     (Vec2 50 20)
     (Binding (("button " ++) . show . counter))
     (\s -> s { counter = 0 })
+-}
 
 sampleLoad :: LoadFn SampleState
 sampleLoad = SampleState
-    <$> (makeUI ("Arial.fnt", "Arial_0.png") myUI)
+    <$> (makeUI ("Arial.fnt", "Arial_0.png") (AnyElement $ myWindow))
     <*> (pure 0)
     <*> (pure $ Vec2 0 0)
 
