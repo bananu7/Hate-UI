@@ -2,7 +2,6 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE ImpredicativeTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module Hate.UI.Types where
@@ -12,8 +11,6 @@ import Hate.Graphics
 import Hate.Math
 
 import Control.Monad.State
-
-import Unsafe.Coerce
 
 data UIBase = UIBase {
     uiFont :: Font
@@ -47,7 +44,7 @@ class Element s a where
     click _ x = (id, x)
 
 
-data AnyElement s = forall e. Element s e => AnyElement { unAnyElement :: e }
+data AnyElement s = forall e. Element s e => AnyElement e
 instance Element s (AnyElement s) where
     drawElement ub s (AnyElement e) = drawElement ub s e
     click mp (AnyElement (e :: e)) = (sE, AnyElement selfE)
