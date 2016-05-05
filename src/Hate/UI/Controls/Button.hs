@@ -19,10 +19,16 @@ import Control.Monad.State (state)
 data Button s = Button Vec2 Vec2 (Label s) (s -> s)
 
 instance Element s (Button s) where
-    drawElement s (Button p sz lab _) = (translate p) <$> drawElement s lab ++ (box (Vec2 0 0) sz)
-    click mp (Button pos sz _ action) = if between (pos, pos + sz) mp 
-        then Just . state $ ((),) . action
-        else Nothing
+    drawElement ub s (Button p sz lab _) = (translate p) <$> drawElement ub s lab ++ (box (Vec2 0 0) sz)
+    click mp (b@(Button pos sz _ action)) = if between (pos, pos + sz) mp 
+        then (action, enlargeButton b)
+        else (id, b)
 
-button :: forall s. Vec2 -> Vec2 -> String -> (s -> s) -> AnyElement s
-button pos sz str action = AnyElement $ (Button pos sz (Label (Vec2 1 1) (PlainValue str) :: Label s) action :: Button s)
+-- TEMP: this is an example of how an effect such as OnHover could be implemented
+enlargeButton (Button p (Vec2 sx sy) lab act) = Button p (Vec2 (sx + 2) sy) lab act
+
+button :: forall s. Vec2 -> Vec2 -> String -> (s -> s) -> Button s
+button pos sz str action = buttonBnd pos sz (PlainValue str) action
+
+buttonBnd :: forall s. Vec2 -> Vec2 -> Binding s String -> (s -> s) -> Button s
+buttonBnd pos sz bnd action = (Button pos sz (Label (Vec2 1 1) bnd :: Label s) action :: Button s)

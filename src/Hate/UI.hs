@@ -26,14 +26,27 @@ import Control.Monad.Reader
 import Control.Monad.State
 import Data.Maybe (catMaybes)
 
-makeUI :: (String, String) -> [AnyElement s]-> IO (UI s)
-makeUI (pathFontData, pathFontSprite) elems = do
+makeUI :: (String, String) -> AnyElement s -> IO (UI s)
+makeUI (pathFontData, pathFontSprite) root = do
     fontData <- loadFontData pathFontData
     fontSprite <- loadSprite pathFontSprite
-    return $ UI (UIBase (fontData, fontSprite)) elems
+    return $ UI (UIBase (fontData, fontSprite)) root
+
 
 drawUI :: HasUI s => s -> [DrawRequest]
-drawUI s = concatMap (drawElement s) (elements . getUI $ s)
+drawUI s = drawElement (base ui) s (root ui)
+    where
+        ui = getUI s
 
-clickUI :: (HasUI s, MonadState s m) => Vec2 -> s -> m ()
-clickUI p s = sequence_ . catMaybes . map (click p) $ (elements . getUI $ s)
+clickUI :: (HasUI s) => Vec2 -> Effect s
+clickUI p = execState $ do
+    ui <- getUI <$> get
+
+    let (effOnS, root') = click p (root ui)
+
+    -- apply self effect
+    let ui' = ui { root = root' }
+    modify $ putUI ui'
+
+    -- apply the root element effect
+    modify effOnS

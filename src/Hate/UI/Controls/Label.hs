@@ -15,8 +15,8 @@ import Hate.Fonts.Loader
 data Label s = Label Vec2 (Binding s String)
 
 instance Element s (Label s) where
-    drawElement s (Label p (PlainValue str)) = (translate p) <$> uiPrint (getUI s) str
-    drawElement s (Label p (Binding b)) = (translate p) <$> uiPrint (getUI s) (b s)
+    drawElement ub s (Label p (PlainValue str)) = (translate p) <$> uiPrint ub str
+    drawElement ub s (Label p (Binding b)) = (translate p) <$> uiPrint ub (b s)
 
 label :: Vec2 -> (Binding s String) -> AnyElement s
 label p b = AnyElement $ Label p b

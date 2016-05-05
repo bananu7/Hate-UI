@@ -2,6 +2,7 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Hate.UI.Types where
 
@@ -15,9 +16,12 @@ data UIBase = UIBase {
     uiFont :: Font
 }
 
+-- The s type is the ultimate type of state the UI can see
+-- in other words, it can do only operations on s, and its
+-- subcomponents can do operations on subparts on s
 data UI s = UI {
     base :: UIBase,
-    elements :: [AnyElement s]
+    root :: AnyElement s
 }
 
 
@@ -25,25 +29,24 @@ data UI s = UI {
 -- We'll see how useful this approach is.
 class HasUI s where
     getUI :: s -> UI s
+    putUI :: UI s -> s -> s
 
 -- |Represents a binding to a type of value a inside of state s
 data Binding s a = PlainValue a | Binding (s -> a)
 
-type Effect s = forall m. (HasUI s, MonadState s m) => Maybe (m ())
+type Effect s = s -> s
+type SelfEffect s a = (Effect s, a)
 
 class Element s a where
-    drawElement :: HasUI s => s -> a -> [DrawRequest]
+    drawElement :: UIBase -> s -> a -> [DrawRequest]
 
-    click :: Vec2 -> a -> Effect s
-    click _ _ = Nothing
+    click :: Vec2 -> a -> SelfEffect s a
+    click _ x = (id, x)
 
-{-
-class EventReceiver s a where
-    receive :: Event -> State a (Effect s)
--}
 
 data AnyElement s = forall e. Element s e => AnyElement e
 instance Element s (AnyElement s) where
-    drawElement s (AnyElement e) = drawElement s e
-    click mp (AnyElement e) = click mp e
-
+    drawElement ub s (AnyElement e) = drawElement ub s e
+    click mp (AnyElement (e :: e)) = (sE, AnyElement selfE)
+        where
+            (sE, selfE) = (click mp e :: SelfEffect s e)
