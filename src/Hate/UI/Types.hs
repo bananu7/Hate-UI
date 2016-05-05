@@ -38,21 +38,18 @@ class HasUI s where
 data Binding s a = PlainValue a | Binding (s -> a)
 
 type Effect s = s -> s
-type SelfEffect s a = (Effect s, Effect a)
+type SelfEffect s a = (Effect s, a)
 
 class Element s a where
     drawElement :: UIBase -> s -> a -> [DrawRequest]
 
     click :: Vec2 -> a -> SelfEffect s a
-    click _ _ = (id, id)
+    click _ x = (id, x)
 
 
 data AnyElement s = forall e. Element s e => AnyElement { unAnyElement :: e }
 instance Element s (AnyElement s) where
     drawElement ub s (AnyElement e) = drawElement ub s e
-    click mp (AnyElement (e :: e)) = (sE, liftToAny selfE)
+    click mp (AnyElement (e :: e)) = (sE, AnyElement selfE)
         where
             (sE, selfE) = (click mp e :: SelfEffect s e)
-
-liftToAny :: Element s e => (e-> e) -> AnyElement s -> AnyElement s
-liftToAny f (AnyElement (e :: e)) = AnyElement $ f (unsafeCoerce e)

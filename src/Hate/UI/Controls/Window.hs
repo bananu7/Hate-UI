@@ -35,11 +35,11 @@ instance Element s (Window s) where
         (drawElement ub w (windowAddBtn w))
         )
 
-    click mp (Window pos sz add dummies) = (id, selfE)
+    click mp w@(Window pos sz add dummies) = (id, self')
         where
-            (winE, addE) = click (mp - pos) add
+            (winE, addBtn') :: SelfEffect (Window s) (Button (Window s)) = click (mp - pos) add
             -- TODO: this update should be much easier to do
-            selfE = winE . (\w -> w { windowAddBtn = addE $ windowAddBtn w })
+            self' = winE $ w { windowAddBtn = addBtn' }
 
 window :: forall s. Vec2 -> Vec2 -> Int -> Window s
 window pos sz n = Window pos sz addBtn children
