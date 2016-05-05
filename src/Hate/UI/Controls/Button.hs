@@ -13,7 +13,7 @@ import Hate.UI.Util
 import Hate.Graphics
 import Hate.Math
 
-import Control.Monad.State (state, modify, MonadState)
+import Control.Monad.State (state)
 
 -- In order to keep things simple, button cannot nest arbitrary controls
 data Button s = Button Vec2 Vec2 (Label s) (s -> s)
@@ -27,7 +27,7 @@ instance Element s (Button s) where
 enlargeButton (Button p (Vec2 sx sy) lab act) = Button p (Vec2 (sx + 2) sy) lab act
 
 button :: forall s. Vec2 -> Vec2 -> String -> (s -> s) -> Button s
-button pos sz str action = (Button pos sz (Label (Vec2 1 1) (PlainValue str) :: Label s) action :: Button s)
+button pos sz str action = buttonBnd pos sz (PlainValue str) action
 
 buttonBnd :: forall s. Vec2 -> Vec2 -> Binding s String -> (s -> s) -> Button s
 buttonBnd pos sz bnd action = (Button pos sz (Label (Vec2 1 1) bnd :: Label s) action :: Button s)

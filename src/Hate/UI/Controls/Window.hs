@@ -17,10 +17,6 @@ import Hate.UI.Util
 import Hate.Graphics
 import Hate.Math
 
-import Control.Monad.State (state)
-import Control.Monad.Writer
-import Data.Maybe (fromMaybe)
-
 data Window s = Window {
     windowPos :: Vec2,
     windowSz :: Vec2,
@@ -38,7 +34,8 @@ instance Element s (Window s) where
     click mp w@(Window pos sz add dummies) = (id, self')
         where
             (winE, addBtn') :: SelfEffect (Window s) (Button (Window s)) = click (mp - pos) add
-            -- TODO: this update should be much easier to do
+            -- Updating the button (component) currently must be done manually
+            -- Probably a helper would be apt
             self' = winE $ w { windowAddBtn = addBtn' }
 
 window :: forall s. Vec2 -> Vec2 -> Int -> Window s
