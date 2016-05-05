@@ -17,6 +17,8 @@ import Hate.UI.Util
 import Hate.Graphics
 import Hate.Math
 
+-- This is an example; it should probably be moved to a proper example program at some
+-- point, and replaced with something genuinely useful.
 data Window s = Window {
     windowPos :: Vec2,
     windowSz :: Vec2,
