@@ -7,6 +7,8 @@ import Hate.Graphics
 import Hate.UI
 
 import Control.Monad.Reader
+import Debug.Trace
+import System.IO.Unsafe
 
 data SampleState = SampleState {
     ui :: UI SampleState,
@@ -46,7 +48,10 @@ sampleDraw :: DrawFn SampleState
 sampleDraw s = drawUI s
 
 processEvent :: MonadState SampleState m => Event -> m ()
-processEvent (EventCursorPos x y) = modify $ \s -> s { mousePos = Vec2 x y }
+processEvent (EventCursorPos x y) = do
+    modify $ \s -> s { mousePos = Vec2 x y }
+    s <- get
+    put $! mouseMoveUI (Vec2 x y) s
 
 -- GLFW.MouseButtonState'Released 
 processEvent (EventMouseButton _ _ _) = do
@@ -58,8 +63,8 @@ processEvent _ = return ()
 
 sampleUpdate :: UpdateFn SampleState
 sampleUpdate evts = do
-    mapM_ processEvent evts
     modify $ \s -> s { counter = counter s + 1 }
+    mapM_ processEvent evts
 
 config :: Config
 config =

@@ -9,6 +9,7 @@ module Hate.UI
     ( makeUI
     , drawUI
     , clickUI
+    , mouseMoveUI
     , module Hate.UI.Types
     , module Hate.UI.Controls
     )
@@ -50,3 +51,24 @@ clickUI p = execState $ do
 
     -- apply the root element effect
     modify effOnS
+
+mouseMoveUI :: (HasUI s) => Vec2 -> Effect s
+mouseMoveUI p = execState $ do
+    ui <- getUI <$> get
+
+    let (effOnS, root') = mouseMove p (root ui)
+
+    -- apply self effect
+    let ui' = ui { root = root' }
+    modify $ putUI ui'
+
+    -- apply the root element effect
+    modify effOnS
+
+{-
+sendUIEvent :: HasUI s => Hate.Event -> Effect s
+sendUIEvent e = execState $ do
+    ui <- getUI <$> get
+
+    case e of
+-}

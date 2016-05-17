@@ -16,6 +16,7 @@ import Hate.UI.Util
 
 import Hate.Graphics
 import Hate.Math
+import Debug.Trace
 
 -- This is an example; it should probably be moved to a proper example program at some
 -- point, and replaced with something genuinely useful.
@@ -36,6 +37,13 @@ instance Element s (Window s) where
     click mp w@(Window pos sz add dummies) = (id, self')
         where
             (winE, addBtn') :: SelfEffect (Window s) (Button (Window s)) = click (mp - pos) add
+            -- Updating the button (component) currently must be done manually
+            -- Probably a helper would be apt
+            self' = winE $ w { windowAddBtn = addBtn' }
+
+    mouseMove mp w@(Window pos sz add dummies) = (id, self')
+        where
+            (winE, addBtn') :: SelfEffect (Window s) (Button (Window s)) = mouseMove (mp - pos) add
             -- Updating the button (component) currently must be done manually
             -- Probably a helper would be apt
             self' = winE $ w { windowAddBtn = addBtn' }

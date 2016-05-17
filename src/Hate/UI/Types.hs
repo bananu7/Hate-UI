@@ -24,7 +24,6 @@ data UI s = UI {
     root :: AnyElement s
 }
 
-
 -- |This is an equivalent of the state monad, but tailored for the UI.
 -- We'll see how useful this approach is.
 class HasUI s where
@@ -40,6 +39,9 @@ type SelfEffect s a = (Effect s, a)
 class Element s a where
     drawElement :: UIBase -> s -> a -> [DrawRequest]
 
+    mouseMove :: Vec2 -> a -> SelfEffect s a
+    mouseMove _ x = (id, x)
+
     click :: Vec2 -> a -> SelfEffect s a
     click _ x = (id, x)
 
@@ -50,3 +52,7 @@ instance Element s (AnyElement s) where
     click mp (AnyElement (e :: e)) = (sE, AnyElement selfE)
         where
             (sE, selfE) = (click mp e :: SelfEffect s e)
+
+    mouseMove mp (AnyElement (e :: e)) = (sE, AnyElement selfE)
+        where
+            (sE, selfE) = (mouseMove mp e :: SelfEffect s e)

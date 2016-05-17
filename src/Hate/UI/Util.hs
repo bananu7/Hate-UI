@@ -18,3 +18,9 @@ box (Vec2 ax ay) (Vec2 bx by) = [
     line (Vec2 bx by) (Vec2 ax by),
     line (Vec2 ax by) (Vec2 ax ay)
     ]
+
+
+filledBox :: Vec2 -> [DrawRequest]
+filledBox (Vec2 w h) = [DrawRequest quad Nothing one FanVertexLayout one (SolidColorPipeline (Vec4 1.0 0.0 0.0 1.0))]
+    where
+        quad = [Vec2 0 0, Vec2 w 0, Vec2 w h, Vec2 0 h]
