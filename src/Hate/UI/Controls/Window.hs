@@ -34,19 +34,16 @@ instance Element s (Window s) where
         (drawElement ub w (windowAddBtn w))
         )
 
-    click mp w@(Window pos sz add dummies) = (id, self')
+    handleEvent evt w@(Window pos sz add dummies) = (id, self')
         where
-            (winE, addBtn') :: SelfEffect (Window s) (Button (Window s)) = click (mp - pos) add
+            (winE, addBtn') :: SelfEffect (Window s) (Button (Window s)) = handleEvent (relativeEvt evt) add
             -- Updating the button (component) currently must be done manually
             -- Probably a helper would be apt
             self' = winE $ w { windowAddBtn = addBtn' }
 
-    mouseMove mp w@(Window pos sz add dummies) = (id, self')
-        where
-            (winE, addBtn') :: SelfEffect (Window s) (Button (Window s)) = mouseMove (mp - pos) add
-            -- Updating the button (component) currently must be done manually
-            -- Probably a helper would be apt
-            self' = winE $ w { windowAddBtn = addBtn' }
+            relativeEvt (UIEvent'MouseDown btn mp) = UIEvent'MouseDown btn (mp - pos)
+            relativeEvt (UIEvent'MouseMove mp) = UIEvent'MouseMove (mp - pos)
+            relativeEvt x = x
 
 window :: forall s. Vec2 -> Vec2 -> Int -> Window s
 window pos sz n = Window pos sz addBtn children

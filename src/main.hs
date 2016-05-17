@@ -51,13 +51,13 @@ processEvent :: MonadState SampleState m => Event -> m ()
 processEvent (EventCursorPos x y) = do
     modify $ \s -> s { mousePos = Vec2 x y }
     s <- get
-    put $! mouseMoveUI (Vec2 x y) s
+    put $ handleEventUI (UIEvent'MouseMove (Vec2 x y)) s
 
 -- GLFW.MouseButtonState'Released 
 processEvent (EventMouseButton _ _ _) = do
     mp <- gets mousePos
     s <- get
-    put $ clickUI mp s
+    put $ handleEventUI (UIEvent'MouseDown MouseButtonLeft mp) s
     
 processEvent _ = return ()
 

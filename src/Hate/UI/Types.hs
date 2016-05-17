@@ -39,20 +39,20 @@ type SelfEffect s a = (Effect s, a)
 class Element s a where
     drawElement :: UIBase -> s -> a -> [DrawRequest]
 
-    mouseMove :: Vec2 -> a -> SelfEffect s a
-    mouseMove _ x = (id, x)
-
-    click :: Vec2 -> a -> SelfEffect s a
-    click _ x = (id, x)
-
+    handleEvent  :: UIEvent -> a -> SelfEffect s a
+    handleEvent _ x = (id, x)
 
 data AnyElement s = forall e. Element s e => AnyElement e
 instance Element s (AnyElement s) where
     drawElement ub s (AnyElement e) = drawElement ub s e
-    click mp (AnyElement (e :: e)) = (sE, AnyElement selfE)
-        where
-            (sE, selfE) = (click mp e :: SelfEffect s e)
 
-    mouseMove mp (AnyElement (e :: e)) = (sE, AnyElement selfE)
+    handleEvent evt (AnyElement (e :: e)) = (sE, AnyElement selfE)
         where
-            (sE, selfE) = (mouseMove mp e :: SelfEffect s e)
+            (sE, selfE) = (handleEvent evt e :: SelfEffect s e)
+
+-- Events
+data MouseButton = MouseButtonLeft | MouseButtonMiddle | MouseButtonRight
+
+data UIEvent = 
+      UIEvent'MouseDown MouseButton Vec2 
+    | UIEvent'MouseMove Vec2

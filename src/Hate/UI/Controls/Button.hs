@@ -25,14 +25,17 @@ instance Element s (Button s) where
             buttonBox = if hover then (filledBox sz)
                                  else (box (Vec2 0 0) sz)
 
-    click mp (b@(Button pos sz _ _ action)) = if between (pos, pos + sz) mp 
-        then (action, enlargeButton b)
-        else (id, b)
+    handleEvent (UIEvent'MouseDown _ mp) (b@(Button pos sz _ _ action)) =
+        if between (pos, pos + sz) mp 
+            then (action, enlargeButton b)
+            else (id, b)
 
-    mouseMove mp (b@(Button pos sz _ _ action)) =
+    handleEvent (UIEvent'MouseMove  mp) (b@(Button pos sz _ _ _)) =
         if between (pos, pos + sz) mp 
             then (id, setHover True b)
             else (id, setHover False b)
+
+    handleEvent _ b = (id, b)
 
 -- TEMP: this is an example of how an effect such as OnHover could be implemented
 enlargeButton (Button p (Vec2 sx sy) h lab act) = Button p (Vec2 (sx + 2) sy) h lab act
