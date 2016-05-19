@@ -3,6 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE DeriveFunctor #-}
 
 module Hate.UI.Types where
 
@@ -31,7 +32,7 @@ class HasUI s where
     putUI :: UI s -> s -> s
 
 -- |Represents a binding to a type of value a inside of state s
-data Binding s a = PlainValue a | Binding (s -> a)
+data Binding s a = PlainValue a | Binding (s -> a) deriving Functor
 
 type Effect s = s -> s
 type SelfEffect s a = (Effect s, a)

@@ -16,7 +16,6 @@ import Hate.UI.Util
 
 import Hate.Graphics
 import Hate.Math
-import Debug.Trace
 
 -- This is an example; it should probably be moved to a proper example program at some
 -- point, and replaced with something genuinely useful.

@@ -4,7 +4,10 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TupleSections #-}
 
-module Hate.UI.Controls.Button where
+module Hate.UI.Controls.Button (
+      button
+    , buttonBnd
+    ) where
 
 import Hate.UI.Types
 import Hate.UI.Controls.Label
@@ -12,12 +15,11 @@ import Hate.UI.Util
 
 import Hate.Graphics
 import Hate.Math
-import Debug.Trace
 
 import Control.Monad.State (state)
 
 -- In order to keep things simple, button cannot nest arbitrary controls
-data Button s = Button !Vec2 !Vec2 !Bool (Label s) (s -> s)
+data Button s = Button Vec2 Vec2 Bool (Label s) (s -> s)
 
 instance Element s (Button s) where
     drawElement ub s (Button p sz hover lab _) = (translate p) <$> buttonBox ++ drawElement ub s lab

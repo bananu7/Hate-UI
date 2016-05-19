@@ -7,8 +7,6 @@ import Hate.Graphics
 import Hate.UI
 
 import Control.Monad.Reader
-import Debug.Trace
-import System.IO.Unsafe
 
 data SampleState = SampleState {
     ui :: UI SampleState,
@@ -63,9 +61,9 @@ processEvent _ = return ()
 
 sampleUpdate :: UpdateFn SampleState
 sampleUpdate evts = do
-    modify $ \s -> s { counter = counter s + 1 }
     mapM_ processEvent evts
-
+    modify $ \s -> s { counter = counter s + 1 }
+    
 config :: Config
 config =
     Config

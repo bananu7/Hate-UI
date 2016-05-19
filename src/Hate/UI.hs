@@ -50,11 +50,3 @@ handleEventUI evt = execState $ do
 
     -- apply the root element effect
     modify effOnS
-
-{-
-sendUIEvent :: HasUI s => Hate.Event -> Effect s
-sendUIEvent e = execState $ do
-    ui <- getUI <$> get
-
-    case e of
--}
