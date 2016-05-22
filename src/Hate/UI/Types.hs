@@ -3,6 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE DeriveFunctor #-}
 
 module Hate.UI.Types where
 
@@ -11,6 +12,7 @@ import Hate.Graphics
 import Hate.Math
 
 import Control.Monad.State
+import Control.Lens
 
 data UIBase = UIBase {
     uiFont :: Font
@@ -24,7 +26,6 @@ data UI s = UI {
     root :: AnyElement s
 }
 
-
 -- |This is an equivalent of the state monad, but tailored for the UI.
 -- We'll see how useful this approach is.
 class HasUI s where
@@ -32,7 +33,7 @@ class HasUI s where
     putUI :: UI s -> s -> s
 
 -- |Represents a binding to a type of value a inside of state s
-data Binding s a = PlainValue a | Binding (s -> a)
+data Binding s a = PlainValue a | Binding (s -> a) deriving Functor
 
 type Effect s = s -> s
 type SelfEffect s a = (Effect s, a)
@@ -40,13 +41,26 @@ type SelfEffect s a = (Effect s, a)
 class Element s a where
     drawElement :: UIBase -> s -> a -> [DrawRequest]
 
-    click :: Vec2 -> a -> SelfEffect s a
-    click _ x = (id, x)
-
+    handleEvent  :: UIEvent -> a -> SelfEffect s a
+    handleEvent _ x = (id, x)
 
 data AnyElement s = forall e. Element s e => AnyElement e
 instance Element s (AnyElement s) where
     drawElement ub s (AnyElement e) = drawElement ub s e
-    click mp (AnyElement (e :: e)) = (sE, AnyElement selfE)
+
+    handleEvent evt (AnyElement (e :: e)) = (sE, AnyElement selfE)
         where
-            (sE, selfE) = (click mp e :: SelfEffect s e)
+            (sE, selfE) = (handleEvent evt e :: SelfEffect s e)
+
+-- Events
+data MouseButton = MouseButtonLeft | MouseButtonMiddle | MouseButtonRight
+
+data UIEvent = 
+      UIEvent'MouseDown MouseButton Vec2 
+    | UIEvent'MouseMove Vec2
+
+class HasPosition a b where
+    position :: Lens' a b
+
+class HasSize a b where
+    size :: Lens' a b
