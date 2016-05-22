@@ -3,37 +3,49 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE FunctionalDependencies #-}
 
 module Hate.UI.Controls.Button (
       button
     , buttonBnd
+    , Button()
     ) where
 
 import Hate.UI.Types
 import Hate.UI.Controls.Label
 import Hate.UI.Util
 
-import Hate.Graphics
-import Hate.Math
+import Hate.Graphics hiding (size)
+import Hate.Math hiding (position)
 
+import Control.Lens
 import Control.Monad.State (state)
 
 -- In order to keep things simple, button cannot nest arbitrary controls
-data Button s = Button Vec2 Vec2 Bool (Label s) (s -> s)
+data Button s = Button {
+    _buttonPosition :: Vec2,
+    _buttonSize :: Vec2,
+    _buttonHover :: Bool,
+    _ButtonLabel :: (Label s),
+    _ButtonAction :: (s -> s)
+}
+makeLenses ''Button
+makeFields ''Button
 
 instance Element s (Button s) where
-    drawElement ub s (Button p sz hover lab _) = (translate p) <$> buttonBox ++ drawElement ub s lab
+    drawElement ub s btn = (translate (btn ^. position)) <$> buttonBox ++ drawElement ub s (btn ^. buttonLabel)
         where
-            buttonBox = if hover then (filledBox sz)
-                                 else (box (Vec2 0 0) sz)
+            buttonBox = if btn ^. hover then filledBox (btn ^. size)
+                                        else (box (Vec2 0 0) (btn ^. size))
 
-    handleEvent (UIEvent'MouseDown _ mp) (b@(Button pos sz _ _ action)) =
-        if between (pos, pos + sz) mp 
-            then (action, enlargeButton b)
+    handleEvent (UIEvent'MouseDown _ mp) b =
+        if insideControl b mp 
+            then (b ^. buttonAction, enlargeButton b)
             else (id, b)
 
-    handleEvent (UIEvent'MouseMove  mp) (b@(Button pos sz _ _ _)) =
-        if between (pos, pos + sz) mp 
+    handleEvent (UIEvent'MouseMove mp) b =
+        if insideControl b mp 
             then (id, setHover True b)
             else (id, setHover False b)
 

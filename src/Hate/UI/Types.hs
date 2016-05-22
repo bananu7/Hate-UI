@@ -12,6 +12,7 @@ import Hate.Graphics
 import Hate.Math
 
 import Control.Monad.State
+import Control.Lens
 
 data UIBase = UIBase {
     uiFont :: Font
@@ -57,3 +58,9 @@ data MouseButton = MouseButtonLeft | MouseButtonMiddle | MouseButtonRight
 data UIEvent = 
       UIEvent'MouseDown MouseButton Vec2 
     | UIEvent'MouseMove Vec2
+
+class HasPosition a b where
+    position :: Lens' a b
+
+class HasSize a b where
+    size :: Lens' a b
